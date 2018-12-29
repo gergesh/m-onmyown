@@ -17,7 +17,7 @@ CLASS = 'יב 4'
 # find table
 ontv = requests.get('{}/indexEmbed.asp?theMosad={}&theIndex=index1'.format(DOMAIN, MOSAD)).text
 page = requests.get('{}/loadMessagesAjax.asp?themosad={}&screen=2&side=both&displayMode=static'.format(DOMAIN, MOSAD)).text
-fileID = re.search(r'data-fileID="(\d+)"', page).group(1)
+fileID = re.search(r'data-fileID="(\d+)"', page).group()
 docx_filename = requests.get('{}/getFileMessageDetailsAjax.asp?fileID={}'.format(DOMAIN, fileID)).text
 docx_url = DOMAIN + '/' + docx_filename[:docx_filename.find(',')].replace('\\', '/')
 # feed to docxlib
@@ -25,9 +25,8 @@ tf, fn = tempfile.mkstemp()
 os.write(tf, requests.get(docx_url).content)
 doc = Document(fn)
 title = doc.paragraphs[0].text.strip()
-day_to_check = date.today() + timedelta(days=1-(datetime.now().hour < 15))
+day_to_check = date.today() + timedelta(days=1-(datetime.now().hour < 15))  # today if it's early, tomorrow otherwise.
 if title[title.rfind(' ')+1:] != day_to_check.strftime('%-d.%-m.%y'):
-    print(title[title.rfind(' ')+1:], tomorrow.strftime('%-d.%-m.%y'), date.today().strftime('%-d.%-m.%y'), datetime.now().hour < 15)
     print('טבלה לא מעודכנת')
     exit(1)
 table = doc.tables[0]
